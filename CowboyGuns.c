@@ -23,6 +23,8 @@ unsigned char enemy_frame;
 unsigned char health=10;
 unsigned char enemy_up_speed=10;
 unsigned char timer=0;
+unsigned char timer0=0;
+unsigned char shoot=5;
 unsigned char floating_down=0;
 unsigned char score0=0;
 unsigned char score1=0;
@@ -58,8 +60,6 @@ void main (void) {
 	vram_unrle(title);
 	ppu_wait_nmi(); // wait
 	
-//	music_play(0); // silence
-	
 	set_vram_buffer(); // points ppu update to vram_buffer, do this at least once
 	music_play(1);
 
@@ -67,7 +67,8 @@ void main (void) {
 	while (1){
 		// infinite loop
 		ppu_wait_nmi(); // wait till beginning of the frame
-		
+		if(timer0>0)
+		timer0--;
 		oam_clear();
 		
 		zapper_ready = pad2_zapper^1; // XOR last frame, make sure not held down still
@@ -150,9 +151,18 @@ void main (void) {
         set_scroll_x(scroll_x);
 		
 		if((pad2_zapper)&&(zapper_ready)){
-				
+			if(shoot==0){
+				if(timer0==0){
+					shoot=5;
+				}
+			}else{
+				shoot--;
+				if(shoot==0){
+					timer0=30;
+				}
+			}
 			// trigger pulled, play bang sound
-			if((state!=2)){
+			if((state!=2)&&(shoot>0)){
 				sfx_play(0,0);
 				pal_col(0x3F00,0x0F);
 				pal_col(0x3F10,0x0F);
@@ -181,7 +191,7 @@ void main (void) {
             }
 			hit_detected = zap_read(1); // look for light in zapper, port 2
 			
-			if(hit_detected){
+			if((hit_detected)&&(shoot>0)){
 				if(state==1){
 					health--;
 					if((health==0)){
@@ -224,4 +234,4 @@ void main (void) {
 		}
 }
 	
-	
+

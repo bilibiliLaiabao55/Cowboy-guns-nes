@@ -52,6 +52,8 @@
 	.export		_health
 	.export		_enemy_up_speed
 	.export		_timer
+	.export		_timer0
+	.export		_shoot
 	.export		_floating_down
 	.export		_score0
 	.export		_score1
@@ -69,6 +71,10 @@ _enemy_up_speed:
 	.byte	$0A
 _timer:
 	.byte	$00
+_timer0:
+	.byte	$00
+_shoot:
+	.byte	$05
 _floating_down:
 	.byte	$00
 _score0:
@@ -826,59 +832,59 @@ _boxes_list:
 	.addr	_boxes_1_data
 _enemy_0_data:
 	.byte	$00
-	.byte	$08
+	.byte	$09
 	.byte	$04
 	.byte	$01
 	.byte	$08
-	.byte	$08
+	.byte	$09
 	.byte	$05
 	.byte	$01
 	.byte	$10
-	.byte	$08
+	.byte	$09
 	.byte	$06
 	.byte	$01
 	.byte	$08
-	.byte	$00
+	.byte	$01
 	.byte	$02
 	.byte	$01
 	.byte	$10
-	.byte	$00
+	.byte	$01
 	.byte	$03
 	.byte	$01
 	.byte	$18
-	.byte	$08
+	.byte	$09
 	.byte	$07
 	.byte	$01
 	.byte	$00
-	.byte	$10
+	.byte	$11
 	.byte	$08
 	.byte	$01
 	.byte	$08
-	.byte	$10
+	.byte	$11
 	.byte	$09
 	.byte	$01
 	.byte	$10
-	.byte	$10
+	.byte	$11
 	.byte	$0A
 	.byte	$01
 	.byte	$18
-	.byte	$10
+	.byte	$11
 	.byte	$0B
 	.byte	$01
 	.byte	$00
-	.byte	$18
+	.byte	$19
 	.byte	$0C
 	.byte	$01
 	.byte	$08
-	.byte	$18
+	.byte	$19
 	.byte	$0D
 	.byte	$01
 	.byte	$10
-	.byte	$18
+	.byte	$19
 	.byte	$0E
 	.byte	$01
 	.byte	$18
-	.byte	$18
+	.byte	$19
 	.byte	$0F
 	.byte	$01
 	.byte	$80
@@ -934,6 +940,10 @@ _enemy_1_data:
 	.byte	$10
 	.byte	$18
 	.byte	$12
+	.byte	$01
+	.byte	$18
+	.byte	$18
+	.byte	$13
 	.byte	$01
 	.byte	$80
 _enemy_list:
@@ -1157,15 +1167,29 @@ _enemy_frame:
 ;
 ; while (1){
 ;
-	jmp     L0022
+	jmp     L002D
 ;
 ; ppu_wait_nmi(); // wait till beginning of the frame
 ;
 L0002:	jsr     _ppu_wait_nmi
 ;
+; if(timer0>0)
+;
+	ldx     #$00
+	lda     _timer0
+	cmp     #$00
+	jsr     boolne
+	jeq     L0005
+;
+; timer0--;
+;
+	ldx     #$00
+	lda     _timer0
+	dec     _timer0
+;
 ; oam_clear();
 ;
-	jsr     _oam_clear
+L0005:	jsr     _oam_clear
 ;
 ; zapper_ready = pad2_zapper^1; // XOR last frame, make sure not held down still
 ;
@@ -1187,7 +1211,7 @@ L0002:	jsr     _ppu_wait_nmi
 	lda     _state
 	cmp     #$01
 	jsr     booleq
-	jeq     L000E
+	jeq     L000F
 ;
 ; scroll_x+=5;
 ;
@@ -1207,7 +1231,7 @@ L0002:	jsr     _ppu_wait_nmi
 	lda     _enemy_frame
 	cmp     #$0B
 	jsr     booleq
-	jeq     L0006
+	jeq     L0007
 ;
 ; enemy_frame=0;
 ;
@@ -1217,21 +1241,21 @@ L0002:	jsr     _ppu_wait_nmi
 ;
 ; }else
 ;
-	jmp     L0007
+	jmp     L0008
 ;
 ; enemy_frame++;
 ;
-L0006:	ldx     #$00
+L0007:	ldx     #$00
 	lda     _enemy_frame
 	inc     _enemy_frame
 ;
 ; if(enemy_type==0){
 ;
-L0007:	ldx     #$00
+L0008:	ldx     #$00
 	lda     _enemy_type
 	cmp     #$00
 	jsr     booleq
-	jeq     L0008
+	jeq     L0009
 ;
 ; enemy_x++;
 ;
@@ -1247,11 +1271,11 @@ L0007:	ldx     #$00
 ;
 ; if(enemy_type==1){
 ;
-L0008:	ldx     #$00
+L0009:	ldx     #$00
 	lda     _enemy_type
 	cmp     #$01
 	jsr     booleq
-	jeq     L0009
+	jeq     L000A
 ;
 ; enemy_x+=3;
 ;
@@ -1269,11 +1293,11 @@ L0008:	ldx     #$00
 ;
 ; if(enemy_type==2){
 ;
-L0009:	ldx     #$00
+L000A:	ldx     #$00
 	lda     _enemy_type
 	cmp     #$02
 	jsr     booleq
-	jeq     L000E
+	jeq     L000F
 ;
 ; enemy_x++;
 ;
@@ -1287,7 +1311,7 @@ L0009:	ldx     #$00
 	lda     _floating_down
 	cmp     #$00
 	jsr     booleq
-	jeq     L000B
+	jeq     L000C
 ;
 ; enemy_y-=3;
 ;
@@ -1303,7 +1327,7 @@ L0009:	ldx     #$00
 	lda     _enemy_y
 	cmp     #$64
 	jsr     boolult
-	jeq     L000C
+	jeq     L000D
 ;
 ; floating_down=1;
 ;
@@ -1313,11 +1337,11 @@ L0009:	ldx     #$00
 ;
 ; }else{
 ;
-L000C:	jmp     L000E
+L000D:	jmp     L000F
 ;
 ; enemy_y+=3;
 ;
-L000B:	ldx     #$00
+L000C:	ldx     #$00
 	lda     #$03
 	clc
 	adc     _enemy_y
@@ -1331,7 +1355,7 @@ L000B:	ldx     #$00
 	lda     #$00
 	ldx     #$00
 	rol     a
-	jeq     L000E
+	jeq     L000F
 ;
 ; floating_down=0;
 ;
@@ -1341,11 +1365,11 @@ L000B:	ldx     #$00
 ;
 ; if(state==2){
 ;
-L000E:	ldx     #$00
+L000F:	ldx     #$00
 	lda     _state
 	cmp     #$02
 	jsr     booleq
-	jeq     L0014
+	jeq     L0015
 ;
 ; if(timer==60){
 ;
@@ -1353,7 +1377,7 @@ L000E:	ldx     #$00
 	lda     _timer
 	cmp     #$3C
 	jsr     booleq
-	jeq     L0010
+	jeq     L0011
 ;
 ; scroll_x=0;
 ;
@@ -1402,7 +1426,7 @@ L000E:	ldx     #$00
 ;
 ; timer--;
 ;
-L0010:	ldx     #$00
+L0011:	ldx     #$00
 	lda     _timer
 	dec     _timer
 ;
@@ -1412,7 +1436,7 @@ L0010:	ldx     #$00
 	lda     _timer
 	cmp     #$00
 	jsr     booleq
-	jeq     L0014
+	jeq     L0015
 ;
 ; ppu_off();
 ;
@@ -1474,7 +1498,7 @@ L0010:	ldx     #$00
 	lda     _enemy_type
 	cmp     #$00
 	jsr     booleq
-	jeq     L0012
+	jeq     L0013
 ;
 ; pal_col(0x3F14,0x0f);
 ;
@@ -1506,11 +1530,11 @@ L0010:	ldx     #$00
 ;
 ; if(enemy_type==1){
 ;
-L0012:	ldx     #$00
+L0013:	ldx     #$00
 	lda     _enemy_type
 	cmp     #$01
 	jsr     booleq
-	jeq     L0013
+	jeq     L0014
 ;
 ; pal_col(0x3F14,0x22);
 ;
@@ -1542,11 +1566,11 @@ L0012:	ldx     #$00
 ;
 ; if(enemy_type==2){
 ;
-L0013:	ldx     #$00
+L0014:	ldx     #$00
 	lda     _enemy_type
 	cmp     #$02
 	jsr     booleq
-	jeq     L0014
+	jeq     L0015
 ;
 ; floating_down=0;
 ;
@@ -1584,30 +1608,87 @@ L0013:	ldx     #$00
 ;
 ; set_scroll_x(scroll_x);
 ;
-L0014:	ldx     #$00
+L0015:	ldx     #$00
 	lda     _scroll_x
 	jsr     _set_scroll_x
 ;
 ; if((pad2_zapper)&&(zapper_ready)){
 ;
 	lda     _pad2_zapper
-	jeq     L0016
+	jeq     L0017
 	lda     _zapper_ready
-	jne     L0017
-L0016:	ldx     #$00
-	lda     #$00
-	jeq     L0018
+	jne     L0018
 L0017:	ldx     #$00
+	lda     #$00
+	jeq     L0019
+L0018:	ldx     #$00
 	lda     #$01
-L0018:	jeq     L0022
+L0019:	jeq     L002D
 ;
-; if((state!=2)){
+; if(shoot==0){
 ;
 	ldx     #$00
+	lda     _shoot
+	cmp     #$00
+	jsr     booleq
+	jeq     L001A
+;
+; if(timer0==0){
+;
+	ldx     #$00
+	lda     _timer0
+	cmp     #$00
+	jsr     booleq
+	jeq     L001B
+;
+; shoot=5;
+;
+	ldx     #$00
+	lda     #$05
+	sta     _shoot
+;
+; }else{
+;
+L001B:	jmp     L001D
+;
+; shoot--;
+;
+L001A:	ldx     #$00
+	lda     _shoot
+	dec     _shoot
+;
+; if(shoot==0){
+;
+	ldx     #$00
+	lda     _shoot
+	cmp     #$00
+	jsr     booleq
+	jeq     L001D
+;
+; timer0=30;
+;
+	ldx     #$00
+	lda     #$1E
+	sta     _timer0
+;
+; if((state!=2)&&(shoot>0)){
+;
+L001D:	ldx     #$00
 	lda     _state
 	cmp     #$02
 	jsr     boolne
-	jeq     L001C
+	jeq     L001F
+	ldx     #$00
+	lda     _shoot
+	cmp     #$00
+	jsr     boolne
+	jne     L0020
+L001F:	ldx     #$00
+	lda     #$00
+	jeq     L0021
+L0020:	ldx     #$00
+	lda     #$01
+L0021:	jeq     L0024
 ;
 ; sfx_play(0,0);
 ;
@@ -1640,7 +1721,7 @@ L0018:	jeq     L0022
 	lda     _state
 	cmp     #$00
 	jsr     booleq
-	jeq     L001A
+	jeq     L0022
 ;
 ; draw_title_box();
 ;
@@ -1648,11 +1729,11 @@ L0018:	jeq     L0022
 ;
 ; if(state==1){
 ;
-L001A:	ldx     #$00
+L0022:	ldx     #$00
 	lda     _state
 	cmp     #$01
 	jsr     booleq
-	jeq     L001B
+	jeq     L0023
 ;
 ; draw_enemy_box();
 ;
@@ -1660,7 +1741,7 @@ L001A:	ldx     #$00
 ;
 ; ppu_mask(0x16); // BG off, won't happen till NEXT frame
 ;
-L001B:	lda     #$16
+L0023:	lda     #$16
 	jsr     _ppu_mask
 ;
 ; ppu_wait_nmi(); // wait till the top of the next frame
@@ -1677,7 +1758,7 @@ L001B:	lda     #$16
 	lda     _state
 	cmp     #$01
 	jsr     booleq
-	jeq     L001C
+	jeq     L0024
 ;
 ; draw_enemy();
 ;
@@ -1685,7 +1766,7 @@ L001B:	lda     #$16
 ;
 ; ppu_mask(0x1e); // bg on, won't happen till NEXT frame
 ;
-L001C:	lda     #$1E
+L0024:	lda     #$1E
 	jsr     _ppu_mask
 ;
 ; if(state==1){
@@ -1694,7 +1775,7 @@ L001C:	lda     #$1E
 	lda     _state
 	cmp     #$01
 	jsr     booleq
-	jeq     L001D
+	jeq     L0025
 ;
 ; pal_col(0x3F00,0x22);
 ;
@@ -1712,14 +1793,25 @@ L001C:	lda     #$1E
 ;
 ; hit_detected = zap_read(1); // look for light in zapper, port 2
 ;
-L001D:	lda     #$01
+L0025:	lda     #$01
 	jsr     _zap_read
 	sta     _hit_detected
 ;
-; if(hit_detected){
+; if((hit_detected)&&(shoot>0)){
 ;
 	lda     _hit_detected
-	jeq     L0022
+	jeq     L0027
+	ldx     #$00
+	lda     _shoot
+	cmp     #$00
+	jsr     boolne
+	jne     L0028
+L0027:	ldx     #$00
+	lda     #$00
+	jeq     L0029
+L0028:	ldx     #$00
+	lda     #$01
+L0029:	jeq     L002D
 ;
 ; if(state==1){
 ;
@@ -1727,7 +1819,7 @@ L001D:	lda     #$01
 	lda     _state
 	cmp     #$01
 	jsr     booleq
-	jeq     L0020
+	jeq     L002B
 ;
 ; health--;
 ;
@@ -1741,7 +1833,7 @@ L001D:	lda     #$01
 	lda     _health
 	cmp     #$00
 	jsr     booleq
-	jeq     L0020
+	jeq     L002B
 ;
 ; state=2;
 ;
@@ -1767,7 +1859,7 @@ L001D:	lda     #$01
 	lda     _score0
 	cmp     #$0A
 	jsr     booleq
-	jeq     L0021
+	jeq     L002C
 ;
 ; score0=0;
 ;
@@ -1783,7 +1875,7 @@ L001D:	lda     #$01
 ;
 ; ppu_off();
 ;
-L0021:	jsr     _ppu_off
+L002C:	jsr     _ppu_off
 ;
 ; vram_adr(0x20A0);
 ;
@@ -1855,11 +1947,11 @@ L0021:	jsr     _ppu_off
 ;
 ; if(state==0){
 ;
-L0020:	ldx     #$00
+L002B:	ldx     #$00
 	lda     _state
 	cmp     #$00
 	jsr     booleq
-	jeq     L0022
+	jeq     L002D
 ;
 ; music_play(0);
 ;
@@ -1914,7 +2006,7 @@ L0020:	ldx     #$00
 ;
 ; while (1){
 ;
-L0022:	jmp     L0002
+L002D:	jmp     L0002
 ;
 ; }
 ;
