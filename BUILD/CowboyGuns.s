@@ -615,7 +615,31 @@ _title:
 	.byte	$01
 	.byte	$00
 	.byte	$03
-	.byte	$87
+	.byte	$20
+	.byte	$20
+	.byte	$1E
+	.byte	$20
+	.byte	$22
+	.byte	$00
+	.byte	$05
+	.byte	$0C
+	.byte	$0F
+	.byte	$0C
+	.byte	$05
+	.byte	$0C
+	.byte	$0F
+	.byte	$0C
+	.byte	$00
+	.byte	$0F
+	.byte	$04
+	.byte	$0C
+	.byte	$04
+	.byte	$05
+	.byte	$04
+	.byte	$12
+	.byte	$00
+	.byte	$03
+	.byte	$51
 	.byte	$02
 	.byte	$02
 	.byte	$00
