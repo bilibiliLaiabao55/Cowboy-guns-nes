@@ -30,10 +30,10 @@ unsigned char score0=0;
 unsigned char score1=0;
 #pragma bss-name(push, "BSS")
 
-const unsigned char pal[]={
+const char pal[]={
     0x0f,0x27,0x17,0x07,
     0x0f,0x0F,0x37,0x10,
-    0x0f,0x30,0x30,0x30,
+    0x0f,0x30,0x10,0x00,
     0x0f,0x0f,0x0f,0x0f,
 
     0x0f,0x30,0x0f,0x0f,
@@ -67,9 +67,15 @@ void main (void) {
 	while (1){
 		// infinite loop
 		ppu_wait_nmi(); // wait till beginning of the frame
-		if(timer0>0)
-		timer0--;
 		oam_clear();
+		if(shoot==0){
+			if(timer0==0){
+				sample_play(2);
+				shoot=5;
+			}else{
+				timer0--;
+			}
+		}
 		
 		zapper_ready = pad2_zapper^1; // XOR last frame, make sure not held down still
 		
@@ -151,19 +157,13 @@ void main (void) {
         set_scroll_x(scroll_x);
 		
 		if((pad2_zapper)&&(zapper_ready)){
-			if(shoot==0){
-				if(timer0==0){
-					shoot=5;
-				}
-			}else{
-				shoot--;
-				if(shoot==0){
-					timer0=30;
-				}
-			}
 			// trigger pulled, play bang sound
 			if((state!=2)&&(shoot>0)){
-				sfx_play(0,0);
+				shoot--;
+				if(shoot==0){
+					timer0=60;
+				}
+				sample_play(1);
 				pal_col(0x3F00,0x0F);
 				pal_col(0x3F10,0x0F);
 				// bg off, project white boxes
