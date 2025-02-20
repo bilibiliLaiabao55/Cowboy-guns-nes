@@ -51,23 +51,28 @@ void draw_enemy(){
 	oam_meta_spr(enemy_x,enemy_y,enemy_list[enemy_frame]);
 }
 void main (void) {
-	
+
 	ppu_off(); // screen off
 	
 	bank_bg(1);
     pal_all(pal);
 	vram_adr(NAMETABLE_A);
 	vram_unrle(title);
-	ppu_wait_nmi(); // wait
-	
+
 	set_vram_buffer(); // points ppu update to vram_buffer, do this at least once
 	music_play(1);
 
 	ppu_on_all(); // turn on screen
+	oam_set(0);
+	oam_spr(256-8,21*8,0xff,0);
+
 	while (1){
-		// infinite loop
 		ppu_wait_nmi(); // wait till beginning of the frame
+		// infinite loop
 		oam_clear();
+		oam_set(0);
+		oam_spr(256-8,21*8,0xff,0);
+
 		if(shoot==0){
 			if(timer0==0){
 				sample_play(2);
@@ -77,7 +82,7 @@ void main (void) {
 			}
 		}
 		
-		zapper_ready = pad2_zapper^1; // XOR last frame, make sure not held down still
+		zapper_ready = pad2_zapper ^ 1; // XOR last frame, make sure not held down still
 		
 		// is trigger pulled?
 		pad2_zapper = zap_shoot(1); // controller slot 2
@@ -112,22 +117,26 @@ void main (void) {
 		}
 		if(state==2){
 			if(timer==60){
-				scroll_x=0;
-				ppu_off();
-				vram_adr(0x210C);
-				vram_put(0x15);
-				vram_put(0x08);
-				vram_put(0x04);
-				vram_put(0x07);
-				vram_put(0x1C);
-				ppu_on_all();
+				one_vram_buffer(0x15, 0x210C);
+				one_vram_buffer(0x08, 0x210D);
+				one_vram_buffer(0x04, 0x210E);
+				one_vram_buffer(0x07, 0x210F);
+				one_vram_buffer(0x1C, 0x2110);
 			}
 			timer--;
 			if(timer==0){
-				ppu_off();
-				vram_adr(NAMETABLE_A);
-				vram_unrle(sands);
-				ppu_on_all();
+				one_vram_buffer(0x00, 0x210C);
+				one_vram_buffer(0x00, 0x210D);
+				one_vram_buffer(0x00, 0x210E);
+				one_vram_buffer(0x00, 0x210F);
+				one_vram_buffer(0x00, 0x2110);
+				one_vram_buffer(0x00, 0x20A0);
+				one_vram_buffer(0x00, 0x20A1);
+				one_vram_buffer(0x00, 0x20A2);
+				one_vram_buffer(0x00, 0x20A3);
+				one_vram_buffer(0x00, 0x20A4);
+				one_vram_buffer(0x00, 0x20A6);
+				one_vram_buffer(0x00, 0x20A7);
 				enemy_x=0;
 				enemy_y=190;
 				state=1;
@@ -154,7 +163,9 @@ void main (void) {
 				}
 			}
 		}
-        set_scroll_x(scroll_x);
+        set_scroll_x(0);
+        set_scroll_y(0);
+		if(state>0)split(scroll_x);
 		
 		if((pad2_zapper)&&(zapper_ready)){
 			// trigger pulled, play bang sound
@@ -164,21 +175,23 @@ void main (void) {
 					timer0=60;
 				}
 				sample_play(1);
+                pal_col(0x3F13,0x0F);
 				pal_col(0x3F00,0x0F);
 				pal_col(0x3F10,0x0F);
 				// bg off, project white boxes
 				oam_clear();
-				if(state==0)
-					draw_title_box();
-				if(state==1){
-					draw_enemy_box();
-				}
+				oam_set(0);
+				oam_spr(256-8,25*8,0xff,0);
+				if(state==0)draw_title_box();
+				if(state==1)draw_enemy_box();
 				ppu_mask(0x16); // BG off, won't happen till NEXT frame
 				
 				ppu_wait_nmi(); // wait till the top of the next frame
 				// this frame will display no BG and a white box
 				
 				oam_clear(); // clear the NEXT frame
+				oam_set(0);
+				oam_spr(256-8,21*8,0xff,0);
 				if(state==1){
 					draw_enemy();
 				}
@@ -188,6 +201,7 @@ void main (void) {
 			if(state==1){
                 pal_col(0x3F00,0x22);
                 pal_col(0x3F10,0x22);
+                pal_col(0x3F13,0x22);
             }
 			hit_detected = zap_read(1); // look for light in zapper, port 2
 			
@@ -199,22 +213,18 @@ void main (void) {
 						timer=60;
 						score0++;
 						if(score0==10){
-							score0=0;
+							score0 = 0;
 							score1++;
 						}
-						ppu_off();
-						vram_adr(0x20A0);
-						vram_put(0x16);
-						vram_put(0x06);
-						vram_put(0x12);
-						vram_put(0x15);
-						vram_put(0x08);
-						vram_put(0x00);
+						one_vram_buffer(0x16, 0x20A0);
+						one_vram_buffer(0x06, 0x20A1);
+						one_vram_buffer(0x12, 0x20A2);
+						one_vram_buffer(0x15, 0x20A3);
+						one_vram_buffer(0x08, 0x20A4);
 						temp1=score1+0x1E;
 						temp2=score0+0x1E;
-						vram_put(temp1);
-						vram_put(temp2);
-						ppu_on_all();
+						one_vram_buffer(temp1, 0x20A6);
+						one_vram_buffer(temp2, 0x20A7);
 					}
 				}
                 if(state==0){
@@ -226,6 +236,7 @@ void main (void) {
                     vram_unrle(sands);
                     pal_col(0x3F00,0x22);
                     pal_col(0x3F10,0x22);
+                    pal_col(0x3F13,0x22);
                     ppu_on_all();
                 }
 			}

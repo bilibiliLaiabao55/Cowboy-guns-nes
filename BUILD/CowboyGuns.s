@@ -19,15 +19,19 @@
 	.import		_ppu_on_all
 	.import		_ppu_mask
 	.import		_oam_clear
+	.import		_oam_spr
 	.import		_oam_meta_spr
+	.import		_oam_set
 	.import		_music_play
 	.import		_sample_play
+	.import		_split
 	.import		_bank_bg
 	.import		_vram_adr
-	.import		_vram_put
 	.import		_vram_unrle
 	.import		_set_vram_buffer
+	.import		_one_vram_buffer
 	.import		_set_scroll_x
+	.import		_set_scroll_y
 	.import		_zap_shoot
 	.import		_zap_read
 	.export		_sands
@@ -199,7 +203,11 @@ _sands:
 	.byte	$FE
 	.byte	$00
 	.byte	$04
-	.byte	$83
+	.byte	$02
+	.byte	$FF
+	.byte	$00
+	.byte	$04
+	.byte	$7F
 	.byte	$29
 	.byte	$2A
 	.byte	$2B
@@ -1148,10 +1156,6 @@ _enemy_frame:
 	ldx     #>(_title)
 	jsr     _vram_unrle
 ;
-; ppu_wait_nmi(); // wait
-;
-	jsr     _ppu_wait_nmi
-;
 ; set_vram_buffer(); // points ppu update to vram_buffer, do this at least once
 ;
 	jsr     _set_vram_buffer
@@ -1165,9 +1169,25 @@ _enemy_frame:
 ;
 	jsr     _ppu_on_all
 ;
+; oam_set(0);
+;
+	lda     #$00
+	jsr     _oam_set
+;
+; oam_spr(256-8,21*8,0xff,0);
+;
+	lda     #$F8
+	jsr     pusha
+	lda     #$A8
+	jsr     pusha
+	lda     #$FF
+	jsr     pusha
+	lda     #$00
+	jsr     _oam_spr
+;
 ; while (1){
 ;
-	jmp     L002C
+	jmp     L002D
 ;
 ; ppu_wait_nmi(); // wait till beginning of the frame
 ;
@@ -1176,6 +1196,22 @@ L0002:	jsr     _ppu_wait_nmi
 ; oam_clear();
 ;
 	jsr     _oam_clear
+;
+; oam_set(0);
+;
+	lda     #$00
+	jsr     _oam_set
+;
+; oam_spr(256-8,21*8,0xff,0);
+;
+	lda     #$F8
+	jsr     pusha
+	lda     #$A8
+	jsr     pusha
+	lda     #$FF
+	jsr     pusha
+	lda     #$00
+	jsr     _oam_spr
 ;
 ; if(shoot==0){
 ;
@@ -1214,7 +1250,7 @@ L0006:	ldx     #$00
 	lda     _timer0
 	dec     _timer0
 ;
-; zapper_ready = pad2_zapper^1; // XOR last frame, make sure not held down still
+; zapper_ready = pad2_zapper ^ 1; // XOR last frame, make sure not held down still
 ;
 L0007:	ldx     #$00
 	lda     _pad2_zapper
@@ -1402,50 +1438,45 @@ L0011:	ldx     #$00
 	jsr     booleq
 	jeq     L0013
 ;
-; scroll_x=0;
-;
-	ldx     #$00
-	lda     #$00
-	sta     _scroll_x
-;
-; ppu_off();
-;
-	jsr     _ppu_off
-;
-; vram_adr(0x210C);
-;
-	ldx     #$21
-	lda     #$0C
-	jsr     _vram_adr
-;
-; vram_put(0x15);
+; one_vram_buffer(0x15, 0x210C);
 ;
 	lda     #$15
-	jsr     _vram_put
+	jsr     pusha
+	ldx     #$21
+	lda     #$0C
+	jsr     _one_vram_buffer
 ;
-; vram_put(0x08);
+; one_vram_buffer(0x08, 0x210D);
 ;
 	lda     #$08
-	jsr     _vram_put
+	jsr     pusha
+	ldx     #$21
+	lda     #$0D
+	jsr     _one_vram_buffer
 ;
-; vram_put(0x04);
+; one_vram_buffer(0x04, 0x210E);
 ;
 	lda     #$04
-	jsr     _vram_put
+	jsr     pusha
+	ldx     #$21
+	lda     #$0E
+	jsr     _one_vram_buffer
 ;
-; vram_put(0x07);
+; one_vram_buffer(0x07, 0x210F);
 ;
 	lda     #$07
-	jsr     _vram_put
+	jsr     pusha
+	ldx     #$21
+	lda     #$0F
+	jsr     _one_vram_buffer
 ;
-; vram_put(0x1C);
+; one_vram_buffer(0x1C, 0x2110);
 ;
 	lda     #$1C
-	jsr     _vram_put
-;
-; ppu_on_all();
-;
-	jsr     _ppu_on_all
+	jsr     pusha
+	ldx     #$21
+	lda     #$10
+	jsr     _one_vram_buffer
 ;
 ; timer--;
 ;
@@ -1461,25 +1492,101 @@ L0013:	ldx     #$00
 	jsr     booleq
 	jeq     L0017
 ;
-; ppu_off();
+; one_vram_buffer(0x00, 0x210C);
 ;
-	jsr     _ppu_off
-;
-; vram_adr(NAMETABLE_A);
-;
-	ldx     #$20
 	lda     #$00
-	jsr     _vram_adr
+	jsr     pusha
+	ldx     #$21
+	lda     #$0C
+	jsr     _one_vram_buffer
 ;
-; vram_unrle(sands);
+; one_vram_buffer(0x00, 0x210D);
 ;
-	lda     #<(_sands)
-	ldx     #>(_sands)
-	jsr     _vram_unrle
+	lda     #$00
+	jsr     pusha
+	ldx     #$21
+	lda     #$0D
+	jsr     _one_vram_buffer
 ;
-; ppu_on_all();
+; one_vram_buffer(0x00, 0x210E);
 ;
-	jsr     _ppu_on_all
+	lda     #$00
+	jsr     pusha
+	ldx     #$21
+	lda     #$0E
+	jsr     _one_vram_buffer
+;
+; one_vram_buffer(0x00, 0x210F);
+;
+	lda     #$00
+	jsr     pusha
+	ldx     #$21
+	lda     #$0F
+	jsr     _one_vram_buffer
+;
+; one_vram_buffer(0x00, 0x2110);
+;
+	lda     #$00
+	jsr     pusha
+	ldx     #$21
+	lda     #$10
+	jsr     _one_vram_buffer
+;
+; one_vram_buffer(0x00, 0x20A0);
+;
+	lda     #$00
+	jsr     pusha
+	ldx     #$20
+	lda     #$A0
+	jsr     _one_vram_buffer
+;
+; one_vram_buffer(0x00, 0x20A1);
+;
+	lda     #$00
+	jsr     pusha
+	ldx     #$20
+	lda     #$A1
+	jsr     _one_vram_buffer
+;
+; one_vram_buffer(0x00, 0x20A2);
+;
+	lda     #$00
+	jsr     pusha
+	ldx     #$20
+	lda     #$A2
+	jsr     _one_vram_buffer
+;
+; one_vram_buffer(0x00, 0x20A3);
+;
+	lda     #$00
+	jsr     pusha
+	ldx     #$20
+	lda     #$A3
+	jsr     _one_vram_buffer
+;
+; one_vram_buffer(0x00, 0x20A4);
+;
+	lda     #$00
+	jsr     pusha
+	ldx     #$20
+	lda     #$A4
+	jsr     _one_vram_buffer
+;
+; one_vram_buffer(0x00, 0x20A6);
+;
+	lda     #$00
+	jsr     pusha
+	ldx     #$20
+	lda     #$A6
+	jsr     _one_vram_buffer
+;
+; one_vram_buffer(0x00, 0x20A7);
+;
+	lda     #$00
+	jsr     pusha
+	ldx     #$20
+	lda     #$A7
+	jsr     _one_vram_buffer
 ;
 ; enemy_x=0;
 ;
@@ -1629,24 +1736,41 @@ L0016:	ldx     #$00
 	lda     #$39
 	jsr     _pal_col
 ;
-; set_scroll_x(scroll_x);
+; set_scroll_x(0);
 ;
 L0017:	ldx     #$00
-	lda     _scroll_x
+	lda     #$00
 	jsr     _set_scroll_x
+;
+; set_scroll_y(0);
+;
+	ldx     #$00
+	lda     #$00
+	jsr     _set_scroll_y
+;
+; if(state>0)split(scroll_x);
+;
+	ldx     #$00
+	lda     _state
+	cmp     #$00
+	jsr     boolne
+	jeq     L0018
+	ldx     #$00
+	lda     _scroll_x
+	jsr     _split
 ;
 ; if((pad2_zapper)&&(zapper_ready)){
 ;
-	lda     _pad2_zapper
-	jeq     L0019
+L0018:	lda     _pad2_zapper
+	jeq     L001A
 	lda     _zapper_ready
-	jne     L001A
-L0019:	ldx     #$00
-	lda     #$00
-	jeq     L001B
+	jne     L001B
 L001A:	ldx     #$00
+	lda     #$00
+	jeq     L001C
+L001B:	ldx     #$00
 	lda     #$01
-L001B:	jeq     L002C
+L001C:	jeq     L002D
 ;
 ; if((state!=2)&&(shoot>0)){
 ;
@@ -1654,18 +1778,18 @@ L001B:	jeq     L002C
 	lda     _state
 	cmp     #$02
 	jsr     boolne
-	jeq     L001D
+	jeq     L001E
 	ldx     #$00
 	lda     _shoot
 	cmp     #$00
 	jsr     boolne
-	jne     L001E
-L001D:	ldx     #$00
-	lda     #$00
-	jeq     L001F
+	jne     L001F
 L001E:	ldx     #$00
+	lda     #$00
+	jeq     L0020
+L001F:	ldx     #$00
 	lda     #$01
-L001F:	jeq     L0023
+L0020:	jeq     L0024
 ;
 ; shoot--;
 ;
@@ -1679,7 +1803,7 @@ L001F:	jeq     L0023
 	lda     _shoot
 	cmp     #$00
 	jsr     booleq
-	jeq     L0020
+	jeq     L0021
 ;
 ; timer0=60;
 ;
@@ -1689,8 +1813,15 @@ L001F:	jeq     L0023
 ;
 ; sample_play(1);
 ;
-L0020:	lda     #$01
+L0021:	lda     #$01
 	jsr     _sample_play
+;
+; pal_col(0x3F13,0x0F);
+;
+	lda     #$13
+	jsr     pusha
+	lda     #$0F
+	jsr     _pal_col
 ;
 ; pal_col(0x3F00,0x0F);
 ;
@@ -1710,33 +1841,43 @@ L0020:	lda     #$01
 ;
 	jsr     _oam_clear
 ;
-; if(state==0)
+; oam_set(0);
+;
+	lda     #$00
+	jsr     _oam_set
+;
+; oam_spr(256-8,25*8,0xff,0);
+;
+	lda     #$F8
+	jsr     pusha
+	lda     #$C8
+	jsr     pusha
+	lda     #$FF
+	jsr     pusha
+	lda     #$00
+	jsr     _oam_spr
+;
+; if(state==0)draw_title_box();
 ;
 	ldx     #$00
 	lda     _state
 	cmp     #$00
 	jsr     booleq
-	jeq     L0021
-;
-; draw_title_box();
-;
+	jeq     L0022
 	jsr     _draw_title_box
 ;
-; if(state==1){
+; if(state==1)draw_enemy_box();
 ;
-L0021:	ldx     #$00
+L0022:	ldx     #$00
 	lda     _state
 	cmp     #$01
 	jsr     booleq
-	jeq     L0022
-;
-; draw_enemy_box();
-;
+	jeq     L0023
 	jsr     _draw_enemy_box
 ;
 ; ppu_mask(0x16); // BG off, won't happen till NEXT frame
 ;
-L0022:	lda     #$16
+L0023:	lda     #$16
 	jsr     _ppu_mask
 ;
 ; ppu_wait_nmi(); // wait till the top of the next frame
@@ -1747,22 +1888,21 @@ L0022:	lda     #$16
 ;
 	jsr     _oam_clear
 ;
-; if(state==1){
+; oam_set(0);
 ;
-	ldx     #$00
-	lda     _state
-	cmp     #$01
-	jsr     booleq
-	jeq     L0023
+	lda     #$00
+	jsr     _oam_set
 ;
-; draw_enemy();
+; oam_spr(256-8,21*8,0xff,0);
 ;
-	jsr     _draw_enemy
-;
-; ppu_mask(0x1e); // bg on, won't happen till NEXT frame
-;
-L0023:	lda     #$1E
-	jsr     _ppu_mask
+	lda     #$F8
+	jsr     pusha
+	lda     #$A8
+	jsr     pusha
+	lda     #$FF
+	jsr     pusha
+	lda     #$00
+	jsr     _oam_spr
 ;
 ; if(state==1){
 ;
@@ -1771,6 +1911,23 @@ L0023:	lda     #$1E
 	cmp     #$01
 	jsr     booleq
 	jeq     L0024
+;
+; draw_enemy();
+;
+	jsr     _draw_enemy
+;
+; ppu_mask(0x1e); // bg on, won't happen till NEXT frame
+;
+L0024:	lda     #$1E
+	jsr     _ppu_mask
+;
+; if(state==1){
+;
+	ldx     #$00
+	lda     _state
+	cmp     #$01
+	jsr     booleq
+	jeq     L0025
 ;
 ; pal_col(0x3F00,0x22);
 ;
@@ -1786,27 +1943,34 @@ L0023:	lda     #$1E
 	lda     #$22
 	jsr     _pal_col
 ;
+; pal_col(0x3F13,0x22);
+;
+	lda     #$13
+	jsr     pusha
+	lda     #$22
+	jsr     _pal_col
+;
 ; hit_detected = zap_read(1); // look for light in zapper, port 2
 ;
-L0024:	lda     #$01
+L0025:	lda     #$01
 	jsr     _zap_read
 	sta     _hit_detected
 ;
 ; if((hit_detected)&&(shoot>0)){
 ;
 	lda     _hit_detected
-	jeq     L0026
+	jeq     L0027
 	ldx     #$00
 	lda     _shoot
 	cmp     #$00
 	jsr     boolne
-	jne     L0027
-L0026:	ldx     #$00
-	lda     #$00
-	jeq     L0028
+	jne     L0028
 L0027:	ldx     #$00
+	lda     #$00
+	jeq     L0029
+L0028:	ldx     #$00
 	lda     #$01
-L0028:	jeq     L002C
+L0029:	jeq     L002D
 ;
 ; if(state==1){
 ;
@@ -1814,7 +1978,7 @@ L0028:	jeq     L002C
 	lda     _state
 	cmp     #$01
 	jsr     booleq
-	jeq     L002A
+	jeq     L002B
 ;
 ; health--;
 ;
@@ -1828,7 +1992,7 @@ L0028:	jeq     L002C
 	lda     _health
 	cmp     #$00
 	jsr     booleq
-	jeq     L002A
+	jeq     L002B
 ;
 ; state=2;
 ;
@@ -1854,9 +2018,9 @@ L0028:	jeq     L002C
 	lda     _score0
 	cmp     #$0A
 	jsr     booleq
-	jeq     L002B
+	jeq     L002C
 ;
-; score0=0;
+; score0 = 0;
 ;
 	ldx     #$00
 	lda     #$00
@@ -1868,45 +2032,45 @@ L0028:	jeq     L002C
 	lda     _score1
 	inc     _score1
 ;
-; ppu_off();
+; one_vram_buffer(0x16, 0x20A0);
 ;
-L002B:	jsr     _ppu_off
-;
-; vram_adr(0x20A0);
-;
+L002C:	lda     #$16
+	jsr     pusha
 	ldx     #$20
 	lda     #$A0
-	jsr     _vram_adr
+	jsr     _one_vram_buffer
 ;
-; vram_put(0x16);
-;
-	lda     #$16
-	jsr     _vram_put
-;
-; vram_put(0x06);
+; one_vram_buffer(0x06, 0x20A1);
 ;
 	lda     #$06
-	jsr     _vram_put
+	jsr     pusha
+	ldx     #$20
+	lda     #$A1
+	jsr     _one_vram_buffer
 ;
-; vram_put(0x12);
+; one_vram_buffer(0x12, 0x20A2);
 ;
 	lda     #$12
-	jsr     _vram_put
+	jsr     pusha
+	ldx     #$20
+	lda     #$A2
+	jsr     _one_vram_buffer
 ;
-; vram_put(0x15);
+; one_vram_buffer(0x15, 0x20A3);
 ;
 	lda     #$15
-	jsr     _vram_put
+	jsr     pusha
+	ldx     #$20
+	lda     #$A3
+	jsr     _one_vram_buffer
 ;
-; vram_put(0x08);
+; one_vram_buffer(0x08, 0x20A4);
 ;
 	lda     #$08
-	jsr     _vram_put
-;
-; vram_put(0x00);
-;
-	lda     #$00
-	jsr     _vram_put
+	jsr     pusha
+	ldx     #$20
+	lda     #$A4
+	jsr     _one_vram_buffer
 ;
 ; temp1=score1+0x1E;
 ;
@@ -1926,27 +2090,29 @@ L002B:	jsr     _ppu_off
 	ldx     #$00
 	sta     _temp2
 ;
-; vram_put(temp1);
+; one_vram_buffer(temp1, 0x20A6);
 ;
 	lda     _temp1
-	jsr     _vram_put
+	jsr     pusha
+	ldx     #$20
+	lda     #$A6
+	jsr     _one_vram_buffer
 ;
-; vram_put(temp2);
+; one_vram_buffer(temp2, 0x20A7);
 ;
 	lda     _temp2
-	jsr     _vram_put
-;
-; ppu_on_all();
-;
-	jsr     _ppu_on_all
+	jsr     pusha
+	ldx     #$20
+	lda     #$A7
+	jsr     _one_vram_buffer
 ;
 ; if(state==0){
 ;
-L002A:	ldx     #$00
+L002B:	ldx     #$00
 	lda     _state
 	cmp     #$00
 	jsr     booleq
-	jeq     L002C
+	jeq     L002D
 ;
 ; music_play(0);
 ;
@@ -1995,13 +2161,20 @@ L002A:	ldx     #$00
 	lda     #$22
 	jsr     _pal_col
 ;
+; pal_col(0x3F13,0x22);
+;
+	lda     #$13
+	jsr     pusha
+	lda     #$22
+	jsr     _pal_col
+;
 ; ppu_on_all();
 ;
 	jsr     _ppu_on_all
 ;
 ; while (1){
 ;
-L002C:	jmp     L0002
+L002D:	jmp     L0002
 ;
 ; }
 ;
