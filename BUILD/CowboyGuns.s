@@ -22,8 +22,6 @@
 	.import		_oam_spr
 	.import		_oam_meta_spr
 	.import		_oam_set
-	.import		_music_play
-	.import		_sample_play
 	.import		_split
 	.import		_bank_bg
 	.import		_vram_adr
@@ -32,6 +30,8 @@
 	.import		_one_vram_buffer
 	.import		_set_scroll_x
 	.import		_set_scroll_y
+	.import		_famistudio_music_play
+	.import		_famistudio_sfx_play
 	.import		_zap_shoot
 	.import		_zap_read
 	.export		_sands
@@ -89,124 +89,88 @@ _score1:
 .segment	"RODATA"
 
 _sands:
-	.byte	$04
+	.byte	$01
 	.byte	$00
-	.byte	$30
-	.byte	$01
-	.byte	$31
 	.byte	$00
-	.byte	$04
-	.byte	$06
-	.byte	$30
-	.byte	$01
-	.byte	$01
-	.byte	$31
-	.byte	$00
-	.byte	$04
-	.byte	$10
-	.byte	$30
-	.byte	$01
-	.byte	$04
-	.byte	$02
-	.byte	$31
-	.byte	$00
-	.byte	$04
-	.byte	$04
-	.byte	$30
-	.byte	$01
-	.byte	$04
+	.byte	$38
 	.byte	$03
-	.byte	$31
+	.byte	$01
+	.byte	$02
+	.byte	$39
 	.byte	$00
+	.byte	$01
+	.byte	$0F
+	.byte	$38
+	.byte	$03
+	.byte	$39
+	.byte	$00
+	.byte	$01
+	.byte	$06
+	.byte	$38
+	.byte	$03
+	.byte	$01
 	.byte	$04
+	.byte	$3D
+	.byte	$00
+	.byte	$01
+	.byte	$03
+	.byte	$38
+	.byte	$03
+	.byte	$03
+	.byte	$3D
+	.byte	$00
+	.byte	$01
+	.byte	$05
+	.byte	$3C
+	.byte	$03
+	.byte	$01
+	.byte	$02
+	.byte	$3D
+	.byte	$00
+	.byte	$01
+	.byte	$05
+	.byte	$3A
+	.byte	$03
+	.byte	$01
+	.byte	$03
+	.byte	$3B
+	.byte	$00
+	.byte	$01
+	.byte	$04
+	.byte	$3A
+	.byte	$03
+	.byte	$3B
+	.byte	$00
+	.byte	$01
 	.byte	$07
-	.byte	$30
-	.byte	$01
-	.byte	$01
-	.byte	$31
-	.byte	$00
-	.byte	$04
-	.byte	$03
-	.byte	$36
-	.byte	$02
-	.byte	$04
-	.byte	$03
-	.byte	$35
-	.byte	$00
-	.byte	$04
-	.byte	$02
-	.byte	$30
-	.byte	$01
-	.byte	$04
-	.byte	$05
-	.byte	$31
-	.byte	$00
-	.byte	$04
-	.byte	$05
-	.byte	$30
-	.byte	$01
-	.byte	$04
-	.byte	$04
-	.byte	$31
-	.byte	$00
-	.byte	$04
-	.byte	$02
 	.byte	$3A
 	.byte	$03
-	.byte	$04
-	.byte	$02
 	.byte	$3B
 	.byte	$00
-	.byte	$04
-	.byte	$02
-	.byte	$36
-	.byte	$02
-	.byte	$04
-	.byte	$06
-	.byte	$35
-	.byte	$00
-	.byte	$04
-	.byte	$03
-	.byte	$30
 	.byte	$01
-	.byte	$04
-	.byte	$06
-	.byte	$31
-	.byte	$00
-	.byte	$04
-	.byte	$0A
-	.byte	$3A
-	.byte	$03
-	.byte	$04
-	.byte	$05
-	.byte	$3B
-	.byte	$00
-	.byte	$04
-	.byte	$03
-	.byte	$02
-	.byte	$04
 	.byte	$07
-	.byte	$37
-	.byte	$00
-	.byte	$04
-	.byte	$16
 	.byte	$3A
 	.byte	$03
-	.byte	$04
-	.byte	$05
+	.byte	$03
 	.byte	$3B
 	.byte	$00
-	.byte	$04
+	.byte	$01
+	.byte	$15
+	.byte	$3C
+	.byte	$03
+	.byte	$3D
+	.byte	$00
+	.byte	$01
 	.byte	$FE
 	.byte	$00
-	.byte	$04
+	.byte	$01
 	.byte	$FE
 	.byte	$00
-	.byte	$04
-	.byte	$02
+	.byte	$01
+	.byte	$41
 	.byte	$FF
 	.byte	$00
-	.byte	$04
+	.byte	$01
 	.byte	$7F
 	.byte	$29
 	.byte	$2A
@@ -241,35 +205,27 @@ _sands:
 	.byte	$2B
 	.byte	$2C
 	.byte	$2D
-	.byte	$04
+	.byte	$01
 	.byte	$5F
 	.byte	$AA
-	.byte	$22
-	.byte	$A8
 	.byte	$AA
-	.byte	$20
-	.byte	$80
+	.byte	$00
 	.byte	$AA
+	.byte	$00
+	.byte	$88
+	.byte	$2A
 	.byte	$A0
 	.byte	$00
-	.byte	$00
-	.byte	$08
-	.byte	$0A
-	.byte	$02
-	.byte	$08
-	.byte	$0A
-	.byte	$0A
-	.byte	$00
-	.byte	$04
-	.byte	$1F
+	.byte	$01
+	.byte	$27
 	.byte	$50
-	.byte	$04
+	.byte	$01
 	.byte	$07
 	.byte	$05
-	.byte	$04
+	.byte	$01
 	.byte	$06
 	.byte	$05
-	.byte	$04
+	.byte	$01
 	.byte	$00
 _title:
 	.byte	$03
@@ -277,35 +233,38 @@ _title:
 	.byte	$03
 	.byte	$0B
 	.byte	$01
-	.byte	$02
+	.byte	$01
 	.byte	$00
 	.byte	$03
 	.byte	$03
 	.byte	$01
-	.byte	$02
-	.byte	$00
-	.byte	$03
-	.byte	$17
 	.byte	$01
-	.byte	$02
 	.byte	$00
 	.byte	$03
-	.byte	$03
+	.byte	$16
+	.byte	$30
 	.byte	$01
-	.byte	$02
-	.byte	$00
-	.byte	$03
-	.byte	$17
 	.byte	$01
-	.byte	$02
+	.byte	$31
 	.byte	$00
-	.byte	$03
-	.byte	$03
+	.byte	$00
+	.byte	$30
 	.byte	$01
-	.byte	$02
+	.byte	$01
+	.byte	$31
 	.byte	$00
 	.byte	$03
-	.byte	$02
+	.byte	$15
+	.byte	$01
+	.byte	$03
+	.byte	$03
+	.byte	$00
+	.byte	$00
+	.byte	$01
+	.byte	$03
+	.byte	$03
+	.byte	$00
+	.byte	$00
 	.byte	$16
 	.byte	$0B
 	.byte	$12
@@ -313,124 +272,88 @@ _title:
 	.byte	$17
 	.byte	$00
 	.byte	$03
-	.byte	$0F
+	.byte	$0E
 	.byte	$01
-	.byte	$02
+	.byte	$03
+	.byte	$03
+	.byte	$00
+	.byte	$00
+	.byte	$01
+	.byte	$03
+	.byte	$03
 	.byte	$00
 	.byte	$03
-	.byte	$03
-	.byte	$01
-	.byte	$02
-	.byte	$00
-	.byte	$03
-	.byte	$07
+	.byte	$06
 	.byte	$17
 	.byte	$0B
 	.byte	$0C
 	.byte	$16
 	.byte	$00
 	.byte	$03
-	.byte	$0B
+	.byte	$0A
+	.byte	$32
 	.byte	$01
-	.byte	$02
+	.byte	$01
+	.byte	$33
+	.byte	$00
+	.byte	$00
+	.byte	$32
+	.byte	$01
+	.byte	$01
+	.byte	$33
 	.byte	$00
 	.byte	$03
-	.byte	$03
-	.byte	$01
-	.byte	$02
-	.byte	$00
-	.byte	$03
-	.byte	$05
+	.byte	$04
 	.byte	$28
 	.byte	$00
 	.byte	$03
 	.byte	$10
 	.byte	$01
-	.byte	$02
+	.byte	$01
 	.byte	$00
 	.byte	$03
 	.byte	$03
 	.byte	$01
-	.byte	$02
+	.byte	$01
 	.byte	$00
 	.byte	$03
 	.byte	$06
 	.byte	$28
 	.byte	$00
 	.byte	$03
-	.byte	$0E
+	.byte	$0C
+	.byte	$30
 	.byte	$01
-	.byte	$03
-	.byte	$09
-	.byte	$00
-	.byte	$03
-	.byte	$06
-	.byte	$28
-	.byte	$00
 	.byte	$03
 	.byte	$0B
-	.byte	$01
-	.byte	$02
-	.byte	$02
-	.byte	$01
-	.byte	$03
-	.byte	$02
-	.byte	$02
-	.byte	$01
-	.byte	$01
-	.byte	$02
-	.byte	$03
-	.byte	$02
-	.byte	$01
-	.byte	$01
+	.byte	$31
 	.byte	$00
-	.byte	$03
-	.byte	$0F
-	.byte	$01
-	.byte	$03
-	.byte	$02
-	.byte	$02
-	.byte	$01
-	.byte	$02
-	.byte	$01
-	.byte	$02
-	.byte	$01
-	.byte	$02
-	.byte	$01
-	.byte	$02
-	.byte	$01
-	.byte	$02
-	.byte	$01
-	.byte	$03
-	.byte	$03
-	.byte	$00
-	.byte	$03
-	.byte	$0D
-	.byte	$01
-	.byte	$03
-	.byte	$02
-	.byte	$02
-	.byte	$02
-	.byte	$01
-	.byte	$01
-	.byte	$02
-	.byte	$03
-	.byte	$02
-	.byte	$01
-	.byte	$02
-	.byte	$02
-	.byte	$01
 	.byte	$03
 	.byte	$04
+	.byte	$28
 	.byte	$00
 	.byte	$03
-	.byte	$0D
+	.byte	$0A
+	.byte	$30
+	.byte	$01
+	.byte	$02
+	.byte	$02
 	.byte	$01
 	.byte	$03
 	.byte	$02
 	.byte	$02
 	.byte	$01
+	.byte	$01
 	.byte	$02
+	.byte	$03
+	.byte	$02
+	.byte	$01
+	.byte	$01
+	.byte	$31
+	.byte	$00
+	.byte	$03
+	.byte	$0F
+	.byte	$01
 	.byte	$01
 	.byte	$02
 	.byte	$01
@@ -438,6 +361,28 @@ _title:
 	.byte	$01
 	.byte	$02
 	.byte	$01
+	.byte	$02
+	.byte	$01
+	.byte	$02
+	.byte	$01
+	.byte	$02
+	.byte	$01
+	.byte	$03
+	.byte	$02
+	.byte	$00
+	.byte	$03
+	.byte	$0F
+	.byte	$01
+	.byte	$01
+	.byte	$02
+	.byte	$02
+	.byte	$01
+	.byte	$01
+	.byte	$02
+	.byte	$03
+	.byte	$02
+	.byte	$01
+	.byte	$02
 	.byte	$02
 	.byte	$01
 	.byte	$03
@@ -446,6 +391,26 @@ _title:
 	.byte	$03
 	.byte	$0F
 	.byte	$01
+	.byte	$01
+	.byte	$02
+	.byte	$01
+	.byte	$02
+	.byte	$01
+	.byte	$02
+	.byte	$01
+	.byte	$02
+	.byte	$01
+	.byte	$02
+	.byte	$01
+	.byte	$02
+	.byte	$01
+	.byte	$03
+	.byte	$02
+	.byte	$00
+	.byte	$03
+	.byte	$0F
+	.byte	$32
+	.byte	$01
 	.byte	$02
 	.byte	$02
 	.byte	$01
@@ -459,31 +424,37 @@ _title:
 	.byte	$02
 	.byte	$01
 	.byte	$01
+	.byte	$33
+	.byte	$00
+	.byte	$03
+	.byte	$10
+	.byte	$32
+	.byte	$01
+	.byte	$03
+	.byte	$0B
+	.byte	$33
 	.byte	$00
 	.byte	$03
 	.byte	$12
-	.byte	$01
-	.byte	$03
-	.byte	$0B
-	.byte	$00
-	.byte	$03
-	.byte	$14
+	.byte	$32
 	.byte	$01
 	.byte	$03
 	.byte	$09
+	.byte	$33
 	.byte	$00
 	.byte	$03
-	.byte	$2D
-	.byte	$01
-	.byte	$03
-	.byte	$02
-	.byte	$00
-	.byte	$03
-	.byte	$02
+	.byte	$2B
+	.byte	$30
 	.byte	$01
 	.byte	$03
 	.byte	$02
+	.byte	$31
 	.byte	$00
+	.byte	$30
+	.byte	$01
+	.byte	$03
+	.byte	$02
+	.byte	$31
 	.byte	$00
 	.byte	$01
 	.byte	$00
@@ -494,22 +465,22 @@ _title:
 	.byte	$01
 	.byte	$03
 	.byte	$02
+	.byte	$31
+	.byte	$00
+	.byte	$30
+	.byte	$01
+	.byte	$01
+	.byte	$31
+	.byte	$01
+	.byte	$00
+	.byte	$01
+	.byte	$00
+	.byte	$00
+	.byte	$01
 	.byte	$00
 	.byte	$03
 	.byte	$02
-	.byte	$01
-	.byte	$01
-	.byte	$00
-	.byte	$01
-	.byte	$00
-	.byte	$01
-	.byte	$00
-	.byte	$00
-	.byte	$01
-	.byte	$00
-	.byte	$03
-	.byte	$02
-	.byte	$01
+	.byte	$33
 	.byte	$00
 	.byte	$01
 	.byte	$00
@@ -562,6 +533,16 @@ _title:
 	.byte	$00
 	.byte	$00
 	.byte	$01
+	.byte	$32
+	.byte	$01
+	.byte	$33
+	.byte	$00
+	.byte	$00
+	.byte	$01
+	.byte	$00
+	.byte	$03
+	.byte	$02
+	.byte	$31
 	.byte	$00
 	.byte	$01
 	.byte	$00
@@ -569,16 +550,6 @@ _title:
 	.byte	$02
 	.byte	$01
 	.byte	$00
-	.byte	$03
-	.byte	$02
-	.byte	$01
-	.byte	$00
-	.byte	$01
-	.byte	$00
-	.byte	$03
-	.byte	$02
-	.byte	$01
-	.byte	$00
 	.byte	$01
 	.byte	$00
 	.byte	$01
@@ -596,35 +567,36 @@ _title:
 	.byte	$01
 	.byte	$00
 	.byte	$01
-	.byte	$00
-	.byte	$03
-	.byte	$03
-	.byte	$01
-	.byte	$03
-	.byte	$02
 	.byte	$00
 	.byte	$03
 	.byte	$02
+	.byte	$32
 	.byte	$01
 	.byte	$03
 	.byte	$02
+	.byte	$33
 	.byte	$00
+	.byte	$32
+	.byte	$01
 	.byte	$03
 	.byte	$02
+	.byte	$33
+	.byte	$00
+	.byte	$32
 	.byte	$01
 	.byte	$00
 	.byte	$01
-	.byte	$00
+	.byte	$33
 	.byte	$00
 	.byte	$01
 	.byte	$03
 	.byte	$02
+	.byte	$33
 	.byte	$00
-	.byte	$03
-	.byte	$02
+	.byte	$32
 	.byte	$01
 	.byte	$01
-	.byte	$00
+	.byte	$33
 	.byte	$00
 	.byte	$01
 	.byte	$00
@@ -653,10 +625,11 @@ _title:
 	.byte	$12
 	.byte	$00
 	.byte	$03
-	.byte	$51
+	.byte	$50
+	.byte	$34
 	.byte	$02
 	.byte	$02
-	.byte	$00
+	.byte	$35
 	.byte	$00
 	.byte	$02
 	.byte	$00
@@ -681,7 +654,7 @@ _title:
 	.byte	$02
 	.byte	$00
 	.byte	$02
-	.byte	$02
+	.byte	$35
 	.byte	$00
 	.byte	$02
 	.byte	$00
@@ -697,37 +670,38 @@ _title:
 	.byte	$02
 	.byte	$00
 	.byte	$02
-	.byte	$00
-	.byte	$02
+	.byte	$36
+	.byte	$35
 	.byte	$02
 	.byte	$00
 	.byte	$03
 	.byte	$11
 	.byte	$02
 	.byte	$00
-	.byte	$02
-	.byte	$02
-	.byte	$00
-	.byte	$02
-	.byte	$00
-	.byte	$00
+	.byte	$34
 	.byte	$02
 	.byte	$00
 	.byte	$02
 	.byte	$00
 	.byte	$00
+	.byte	$02
+	.byte	$00
+	.byte	$02
+	.byte	$00
+	.byte	$36
 	.byte	$02
 	.byte	$00
 	.byte	$03
-	.byte	$12
+	.byte	$11
+	.byte	$36
 	.byte	$02
-	.byte	$03
 	.byte	$02
+	.byte	$37
 	.byte	$00
-	.byte	$00
+	.byte	$36
 	.byte	$02
 	.byte	$02
-	.byte	$00
+	.byte	$37
 	.byte	$00
 	.byte	$02
 	.byte	$00
@@ -977,9 +951,9 @@ _pal:
 	.byte	$37
 	.byte	$10
 	.byte	$0F
-	.byte	$30
-	.byte	$10
 	.byte	$00
+	.byte	$10
+	.byte	$30
 	.byte	$0F
 	.byte	$0F
 	.byte	$0F
@@ -1160,10 +1134,10 @@ _enemy_frame:
 ;
 	jsr     _set_vram_buffer
 ;
-; music_play(1);
+; famistudio_music_play(0);
 ;
-	lda     #$01
-	jsr     _music_play
+	lda     #$00
+	jsr     _famistudio_music_play
 ;
 ; ppu_on_all(); // turn on screen
 ;
@@ -1229,10 +1203,12 @@ L0002:	jsr     _ppu_wait_nmi
 	jsr     booleq
 	jeq     L0006
 ;
-; sample_play(2);
+; famistudio_sfx_play(1, FAMISTUDIO_SFX_CH0);
 ;
-	lda     #$02
-	jsr     _sample_play
+	lda     #$01
+	jsr     pusha
+	lda     #$00
+	jsr     _famistudio_sfx_play
 ;
 ; shoot=5;
 ;
@@ -1811,10 +1787,12 @@ L0020:	jeq     L0024
 	lda     #$3C
 	sta     _timer0
 ;
-; sample_play(1);
+; famistudio_sfx_play(0, FAMISTUDIO_SFX_CH0);
 ;
-L0021:	lda     #$01
-	jsr     _sample_play
+L0021:	lda     #$00
+	jsr     pusha
+	lda     #$00
+	jsr     _famistudio_sfx_play
 ;
 ; pal_col(0x3F13,0x0F);
 ;
@@ -2114,10 +2092,10 @@ L002B:	ldx     #$00
 	jsr     booleq
 	jeq     L002D
 ;
-; music_play(0);
+; famistudio_music_play(1);
 ;
-	lda     #$00
-	jsr     _music_play
+	lda     #$01
+	jsr     _famistudio_music_play
 ;
 ; state=2;
 ;

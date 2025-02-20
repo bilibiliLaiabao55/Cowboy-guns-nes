@@ -2,6 +2,7 @@
 
 #include "LIB/neslib.h"
 #include "LIB/nesdoug.h"
+#include "MUSIC/famistudio_cc65.h"
 #include "LIB/zaplib.h"
 #include "BG/sands.h"
 #include "BG/title.h"
@@ -33,7 +34,7 @@ unsigned char score1=0;
 const char pal[]={
     0x0f,0x27,0x17,0x07,
     0x0f,0x0F,0x37,0x10,
-    0x0f,0x30,0x10,0x00,
+    0x0f,0x00,0x10,0x30,
     0x0f,0x0f,0x0f,0x0f,
 
     0x0f,0x30,0x0f,0x0f,
@@ -60,7 +61,7 @@ void main (void) {
 	vram_unrle(title);
 
 	set_vram_buffer(); // points ppu update to vram_buffer, do this at least once
-	music_play(1);
+	famistudio_music_play(0);
 
 	ppu_on_all(); // turn on screen
 	oam_set(0);
@@ -75,7 +76,7 @@ void main (void) {
 
 		if(shoot==0){
 			if(timer0==0){
-				sample_play(2);
+				famistudio_sfx_play(1, FAMISTUDIO_SFX_CH0);
 				shoot=5;
 			}else{
 				timer0--;
@@ -174,7 +175,7 @@ void main (void) {
 				if(shoot==0){
 					timer0=60;
 				}
-				sample_play(1);
+				famistudio_sfx_play(0, FAMISTUDIO_SFX_CH0);
                 pal_col(0x3F13,0x0F);
 				pal_col(0x3F00,0x0F);
 				pal_col(0x3F10,0x0F);
@@ -228,7 +229,7 @@ void main (void) {
 					}
 				}
                 if(state==0){
-					music_play(0);
+					famistudio_music_play(1);
                     state=2;
 					timer=60;
                     ppu_off();

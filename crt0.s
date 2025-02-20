@@ -3,19 +3,6 @@
 
 
 
-FT_BASE_ADR		= $0100		;page in RAM, should be $xx00
-FT_DPCM_OFF		= $f000		;$c000..$ffc0, 64-byte steps
-FT_SFX_STREAMS	= 1			;number of sound effects played at once, 1..4
-
-FT_THREAD       = 1		;undefine if you call sound effects in the same thread as sound update
-FT_PAL_SUPPORT	= 1		;undefine to exclude PAL support
-FT_NTSC_SUPPORT	= 1		;undefine to exclude NTSC support
-FT_DPCM_ENABLE  = 1		;undefine to exclude all DMC code
-FT_SFX_ENABLE   = 1		;undefine to exclude all sound effects code
-
-
-
-
 
 ;REMOVED initlib
 ;this called the CONDES function
@@ -231,16 +218,14 @@ detectNTSC:
 	ldx #0
 	jsr _set_vram_update
 
-	ldx #<music_data
-	ldy #>music_data
-	lda <NTSC_MODE
-	jsr FamiToneInit
+	ldx #<music_data_cowboy_guns
+	ldy #>music_data_cowboy_guns
+	lda 0
+	jsr famistudio_init
 
-	.if(FT_SFX_ENABLE)
-	ldx #<sounds_data
-	ldy #>sounds_data
-	jsr FamiToneSfxInit
-	.endif
+	ldx #<sounds
+	ldy #>sounds
+	jsr famistudio_sfx_init
 
 	lda #$fd
 	sta <RAND_SEED
@@ -254,29 +239,22 @@ detectNTSC:
 
 	.include "LIB/neslib.s"
 	.include "LIB/nesdoug.s"
-	.include "MUSIC/famitone2.s"
+	.include "MUSIC/famistudio_ca65.s"
 	.include "LIB/zaplib.s"
 	
 	
 	
 .segment "RODATA"
-
-music_data:
 	.include "MUSIC/music.s"
 ; since we have no music included, don't try to play a song
 ; or it will crash the game.
-
-
-
-
-sounds_data:
-	;.include "MUSIC/sounds.s"
+	.include "MUSIC/sounds.s"
 
 
 	
 	
 .segment "SAMPLES"
-	.incbin "MUSIC/music.dmc"
+	;.incbin "MUSIC/music.dmc"
 
 
 
